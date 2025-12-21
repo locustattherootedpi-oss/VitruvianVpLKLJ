@@ -1,0 +1,228 @@
+%%%%%%%% ICML 2021 EXAMPLE LATEX SUBMISSION FILE %%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\usepackage{amsfonts}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\newtheorem{assumption}{Assumption}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newtheorem{definition}{Definition} 
+\usepackage{booktabs} % for professional tables
+
+% hyperref makes hyperlinks in the resulting PDF.
+% If your build breaks (sometimes temporarily if a hyperlink spans a page)
+% please comment out the following usepackage line and replace
+% \usepackage{icml2021} with \usepackage[nohyperref]{icml2021} above.
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+% Attempt to make hyperref and algorithmic work together better:
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\newcommand{\notice}[1]{{\textrm{\textcolor{blue}{#1}}}}
+
+\newcommand{\fixme}[1]{\textcolor{red}{#1}}
+\newcommand{\cd}[1]{\textcolor{brown}{[\small cd: ~#1~]}}
+\newcommand{\zz}[1]{\textcolor{blue}{[\small zhiru: ~#1~]}}
+
+% Use the following line for the initial blind version submitted for review:
+%\usepackage{icml2021}
+
+% If accepted, instead use the following line for the camera-ready submission:
+\usepackage[accepted]{icml2021}
+
+%%% Aliases
+\newcommand{\Name}{SPADE} 
+
+% The \icmltitle you define below is probably too long as a header.
+% Therefore, a short form for the running title is supplied here:
+\icmltitlerunning{{\Name}: A Spectral Method for Black-Box Adversarial Robustness Evaluation}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{{\Name}: A \underline{Sp}ectral Method for Black-Box \underline{Ad}versarial Robustness \underline{E}valuation}
+
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2021
+% package.
+
+% List of affiliations: The first argument should be a (short)
+% identifier you will use later to specify author affiliations
+% Academic affiliations should list Department, University, City, Region, Country
+% Industry affiliations should list Company, City, Region, Country
+
+% You can specify symbols, otherwise they are numbered in order.
+% Ideally, you should not use this facility. Affiliations will be numbered
+% in order of appearance and this is the preferred way.
+\icmlsetsymbol{equal}{*}
+
+\begin{icmlauthorlist}
+\icmlauthor{Wuxinlin Cheng}{equal,to}
+\icmlauthor{Chenhui Deng}{equal,goo}
+\icmlauthor{Zhiqiang Zhao}{equal,to}
+\icmlauthor{Yaohui Cai}{goo}
+\icmlauthor{Zhiru Zhang}{goo}
+\icmlauthor{Zhuo Feng}{to}
+%\icmlauthor{Aaoeu Iasoh}{goo}
+%\icmlauthor{Buiui Eueu}{ed}
+%\icmlauthor{Aeuia Zzzz}{ed}
+%\icmlauthor{Bieea C.~Yyyy}{to,goo}
+%\icmlauthor{Teoau Xxxx}{ed}
+%\icmlauthor{Eee Pppp}{ed}
+\end{icmlauthorlist}
+
+\icmlaffiliation{to}{Stevens Institute of Technology, New Jersey, USA}
+\icmlaffiliation{goo}{Cornell University, New York, USA}
+%\icmlaffiliation{ed}{School of Computation, University of Edenborrow, Edenborrow, United Kingdom}
+
+\icmlcorrespondingauthor{Zhuo Feng}{zhuo.feng@stevens.edu}
+\icmlcorrespondingauthor{Zhiru Zhang}{zhiruz@cornell.edu}
+
+% You may provide any keywords that you
+% find helpful for describing your paper; these are used to populate
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{Machine Learning, ICML}
+
+\vskip 0.3in
+]
+
+% this must go after the closing bracket ] following \twocolumn[ ...
+
+% This command actually creates the footnote in the first column
+% listing the affiliations and the copyright notice.
+% The command takes one argument, which is text to display at the start of the footnote.
+% The \icmlEqualContribution command is standard text for equal contribution.
+% Remove it (just {}) if you do not need this facility.
+
+%\printAffiliationsAndNotice{}  % leave blank if no need to mention equal contribution
+\printAffiliationsAndNotice{\icmlEqualContribution} % otherwise use the standard text.
+
+%\input{abstract}
+\begin{abstract}
+ A black-box spectral method is introduced for evaluating the adversarial robustness of a given machine learning (ML) model. Our approach, named SPADE, exploits  bijective distance mapping between the input/output graphs constructed for approximating the manifolds corresponding to the input/output data. By leveraging the generalized Courant-Fischer theorem, we propose a SPADE score for evaluating the adversarial robustness of a given model, which is proved to be an upper bound of the best Lipschitz constant under the manifold setting. To  reveal the most non-robust data samples highly vulnerable to adversarial attacks, we develop a spectral graph embedding procedure leveraging dominant generalized eigenvectors. This embedding step allows assigning each data sample a robustness score that can be further harnessed for more effective adversarial training. %of ML models. 
+ Our experiments show the proposed SPADE method leads to promising empirical results for neural network models that are adversarially trained with the MNIST and CIFAR-10 data sets. 
+ %Source code of SPADE is freely available at \href{https://github.com/Feng-Research/SPADE}{github.com/Feng-Research/SPADE}.
+%  \cd{seems we do not mention the experiments of model SPADE score and SPADE-guided robustness evaluation?}
+\end{abstract}
+
+%\input{introduction}
+\section{Introduction}
+\label{sec:intro}
+ Recent research efforts have demonstrated the evident lack of robustness in state-of-the-art machine learning (ML) models---e.g., a visually imperceptible adversarial image can be crafted via an optimization procedure to mislead a well-trained deep neural network (DNN)  \cite{szegedy2013intriguing, goodfellow2014explaining}. Consequently, it is becoming increasingly important to effectively assess and improve the adversarial robustness of ML models for safety-critical applications, such as autonomous driving systems. To this end, a variety of white-box approaches has been proposed. For instance, study in \cite{szegedy2013intriguing} proposed a layer-wise global Lipschitz constant estimation approach, which provides a loose bound on robustness evaluation;    \cite{hein2017formal} introduced a method for assessing the lower bound of model robustness based on  local Lipschitz continuous condition for a multilayer perceptron (MLP) with a
+single hidden layer; \cite{weng2018evaluating} proposed a method for estimating local Lipschitz constant based on extreme value theory. However, most existing adversarial robustness evaluation frameworks are based on white-box methods which assume the model parameters are given in advance. For example, the recent CLEVER algorithm for adversarial robustness evaluation \cite{weng2018evaluating} requires full access to the gradient information of a given neural network for estimating a universal lower
+bound on the minimal distortion required to craft an adversarial example from an original one.
+
+This work introduces SPADE \footnote{The SPADE source code is available at  \href{https://github.com/Feng-Research/SPADE}{github.com/Feng-Research/SPADE}.}, a black-box method for evaluating %function (model) 
+adversarial robustness by only using the input (features) and output vectors of the ML model. Essentially, our method evaluates adversarial robustness through checking if there exist two nearby input data samples that can be mapped to very distant output ones by the underlying function of the ML model; if so, we have a large distance mapping distortion (DMD), which implies potentially poor adversarial robustness since a small perturbation applied to these inputs can lead to rather significant changes on the output side. To allow meaningful distance comparisons of  input/output data samples in a high-dimensional space, our approach leverages graph-based manifolds and focuses on resistance distance metric for adversarial robustness evaluations. The main contributions of this work are as follows:
+
+\noindent $\bullet$ To our knowledge, we are the first to introduce a black-box spectral method (SPADE) for adversarial robustness evaluation of an ML model by examining the bijective distance mappings between the input/output graph-based manifolds. 
+
+% To allow meaningful distance comparisons for the input/output data samples, .
+\noindent $\bullet$ We show that the largest generalized eigenvalue (i.e., SPADE score) computed with the input/output graph Laplacians can be a good surrogate (upper bound) for the best Lipschitz constant of the  underlying function, which thus can be leveraged for quantifying the adversarial robustness.
+
+\noindent $\bullet$  We propose   a spectral graph embedding scheme  leveraging the generalized Courant-Fischer theorem    for estimating the  robustness of each data point:     a data point  with a larger SPADE score  means it may contain a greater amount of non-robust  features, and thus can be more vulnerable to adversarial perturbations.
+
+\noindent $\bullet$  We show that the SPADE score of an ML model can be directly used as a black-box metric for   quantifying its adversarial robustness. Moreover,  by taking advantage of   the SPADE scores of input data samples,  {existing methods for  adversarial training  can be {further} improved,  achieving state-of-the-art performance.} 
+
+%\input{background}
+\section{Background}
+\label{sec:background}
+\subsection{Spectral Graph Theory}
+%\cd{I modified part of the text below.}
+
+For an undirected graph $G=(V,E,w)$, $V$ denotes a set of nodes (vertices), $E$ denotes a set of (undirected) edges, and $w$ denotes the associated edge weights. The graph adjacency matrix can be defined as:
+ %We define ${D_G}$ to be a diagonal matrix with ${D_G}(i,i)$ being equal to the (weighted)  degree of node $i$, and ${A_G}$ and ${L_G}$ to be the adjacency and Laplacian matrices of undirected graph $G$  as follows, respectively:
+\begin{equation}\label{di_adjacency}
+{A}(i,j)=\begin{cases}
+w(i,j) & \text{ if } (i,j)\in E \\
+0 & \text{otherwise }
+\end{cases}
+\vspace{-5pt}
+\end{equation}
+
+Let $D$ denote the diagonal matrix with ${D}(i,i)$ being equal to the (weighted) degree of node $i$. The graph Laplacian matrix can be constructed by ${L={D}-{A}}$.
+%which satisfies the following conditions: (1) The sum of each column or row equals zero; (2) All off-diagonal elements are non-positive; (3) The graph Laplacian is a symmetric diagonally dominant (SDD) matrix with non-negative eigenvalues.
+
+\iftrue
+\begin{lemma}\label{lamma:eig}
+(Courant-Fischer Minimax Theorem) The $k$-th largest eigenvalue of the Laplacian matrix $L \in \mathbb{R}^{|V|\times|V|}$ can be computed as follows:
+\begin{equation}
+    \lambda_k(L) = \min_{dim(U)=k}\,{\max_{\substack{x \in U \\ x \neq 0}}{\frac{x^\top Lx}{x^\top x}}}
+\end{equation}
+%\vspace{-7pt}
+\end{lemma}
+Lemma \ref{lamma:eig} describes the Courant-Fischer Minimax Theorem \cite{golub2013matrix} for computing the spectrum of the Laplacian matrix $L$. 
+%Given Laplacian matrices $L_X \in \mathcal{R}^{|V|}$ and $L_Y \in \mathcal{R}^{|V|}$, 
+
+A more general form for Lemma \ref{lamma:eig} is referred as the generalized Courant-Fischer Minimax Theorem \cite{golub2013matrix}, which can be described as follows:
+\fi
+%\cd{I temporarily remove the first lemma about Courant-Fischer Minimax theorem for compressing the text. Feel free to add it back if we have more space}
+\begin{lemma}\label{lamma:generalized_eig}
+(The Generalized Courant-Fischer Minimax Theorem) Given two Laplacian matrices $L_X \in \mathbb{R}^{|V|\times|V|}$ and $L_Y \in \mathbb{R}^{|V|\times|V|}$ such that $null(L_Y) \subseteq null(L_X)$, the $k$-th largest eigenvalue of $L_Y^{+}L_X$ can be computed as follows under the condition of $1 \leq k \leq rank(L_Y)$:
+\begin{equation}
+    \lambda_k(L_Y^{+}L_X) = \min_{\substack{dim(U)=k \\ U \bot null(L_Y)}}\,{\max_{x \in U }{\frac{x^\top L_Xx}{x^\top L_Yx}}}
+\end{equation}
+\end{lemma}
+
+
+\subsection{Adversarially Robust Machine Learning}
+Machine learning has been increasingly deployed in the safety- and security-sensitive applications, such as vision for autonomous cars, malware detection, and face recognition \cite{biggio2013security,kloft2010online}. There is an active body of research on adversarial ML, which attempts to understand and improve the robustness of the ML models. 
+%Different from the classical ML setting where the underlying data distribution is assumed to be stationary, samples can be actively manipulated, and 
+For example, adversarial attack aims to mislead the ML techniques by supplying the deceptive inputs such as input samples with perturbations \cite{goodfellow2018making, fawzi2018analysis}, which are commonly known as adversarial examples. It has been shown that state-of-the-art ML techniques are highly vulnerable to adversarial input samples during both training and inference \cite{ szegedy2013intriguing, nguyen2015deep, moosavi2016deepfool}. Hence resistance to adversarially chosen inputs is becoming a very important goal for designing ML models \cite{madry2018towards, barreno2010security}. 
+
+There are also a number of defending methods proposed to mitigate the effects of adversarial attacks, which can be broadly divided into reactive and proactive defence. Reactive defence focuses on the detection of the adversarial examples from the model inputs \cite{feinman2017detecting, metzen2017detecting, xu2018feature, yang2020ml}. Proactive defence, on the other hand, tries to improve the  robustness of the models so they are not easily fooled by the adversarial examples \cite{gu2014towards, cisse2017parseval, shaham2018understanding,liu2018adv, xu2019topology, feng2019graph, jin2020graph}. %\zz{can we cite some more recent papers? in general, it's better to sort cites by the year} 
+These techniques usually make use of model parameter regularisation and robust optimization. While different defense mechanisms may be effective against certain classes of attacks, none of them
+are deemed as a one-stop solution to achieving adversarial robustness. 
+
+\subsection{Methods for  Adversarial Robustness Evaluation}
+% \notice{Wuxinlin: Briefly introduce the CLEVER and other related works.}\\
+Although there are flourishing attack and defense approaches through adversarial examples, little progress has been made towards an attack-agnostic, black-box, and computationally affordable quantification of robustness level. For example, most existing approaches measure the robustness of a neural network via the attack success rate or the distortion of the adversarial examples yielded from certain attacks, such as the fast gradient sign method (FGSM)~\cite{goodfellow2014explaining, Kurakin2016}, Carlini \& Wagner’s attack (CW)~\cite{CW}, and projected gradient descent (PGD)~\cite{madry2018towards}. As \cite{weng2018evaluating} elaborated, for a given dataset and the corresponding adversarial examples yielded from an attack algorithm, the success rate of attack and the distortion of adversarial examples are treated as robustness metrics. Due to the entanglement between network robustness and the attack algorithm, such kinds of robustness measurements can cause biased analysis. Moreover, attack capabilities also limit the analysis. In contrast, our proposed robustness metric is attack-agnostic and thus avoids the above issues.
+
+Recently, \cite{weng2018evaluating} proposed a robustness metric called CLEVER score
+%Cross Lipschitz Extreme Value for nEtwork Robustness (CLEVER).
+that consists of two major steps to compute. The first step is computing the cross Lipschitz constant $L^{j}_{q,x_{0}}$, which is defined as the maximum $\left\|\nabla g\left(x\right)\right\|_{q}$, where $p$ is the perturbation norm, $q=\dfrac{p}{p-1}$, $g\left(x\right)=f_{c}\left(x\right)-f_{j}\left(x\right)$, and the $f$ is a neural network classifier. %\fixme{Then  store the maximum values.} \zz{which max values? fix grammar}
+Second, the location estimate, which is the maximum likelihood estimation of location parameter of reverse Weibull distribution on maximum $\left\|\nabla g\left(x^{\left(i,k\right)}\right)\right\|_{q}$ in each batch, is used as an estimation for the local cross Lipschitz constant (i.e., the CLEVER score).
+The robustness metric CLEVER score is a reasonably effective estimator of the lower bound of minimum distortion. %It is computationally feasible for large neural networks. 
+It can roughly indicate the best possible attack in terms of distortion. 
+%\fixme{because this approach is attack-agnostic}. \zz{indicating best attack and attack agnostic are two orthogonal things?} 
+However, it is important to note that CLEVER falls into the white-box measurement category. It requires backpropagation where weights between different layers and activation functions at each layer are needed to calculate $\nabla g\left(x\right)$, which is computationally costly. Different from the CLEVER score, our metric targets the black-box measurement of robustness and has a lower computational cost.
+
+%\input{methodology}
+\vspace{-7pt}
+\section{The SPADE Robustness Metric} 
+\label{sec:spade}
+\begin{figure*}[ht]
+\vskip 0.2in
+\begin{center}
+\centerline{\includegraphics[width=2\columnwidth]{figure/SPADE-overview.pdf}}
+\caption{Overview of the proposed method. (a) Given  bijective input ($X$) and output ($Y$) data samples, SPADE first constructs graph-based manifolds. (b) SPADE  exploits   distance mapping distortions (DMDs) on  manifolds for adversarial robustness evaluation. (c) Each data sample is given a SPADE score to reflect its level of non-robustness. (d) Applications for SPADE-guided adversarially-robust  ML.}
+\vspace{-8pt}
+\label{fig:overview}
+\end{center}
+%\vskip -0.2in
+\vspace{-15pt}
+\end{figure*}
+%\subsection{Overview}
+Figure \ref{fig:overview} shows an overview of SPADE, our spectral method for black-box adversarial robustness evaluation. There are four key steps in our proposed approach: \textbf{(a)}  We first construct graph-based manifolds for both input and output data of a given ML model. \textbf{(b)} We then compute the {SPADE score}  for measuring the robustness of the ML model based on bijective distance mapping under the manifold setting. \textbf{(c)} We further extend the {SPADE score} to quantify the robustness of each input data sample. \textbf{(d)} We also develop SPADE-guided methods for adversarial training and robustness evaluation. As discussed in Section \ref{sec:app}, the SPADE-guided adversarial training can be done by adaptively setting the size  of the norm-bounded perturbation  for each data sample according to its   SPADE score, such that stronger defenses can be set up   for  more vulnerable data samples.  
+% \cd{This section does not introduce step (d) (i.e., the SPADE-guided methods), not quite sure if this is fine}
+% \zz{shall we use SPADE score to be consistent with the terms in Sec 4}
+
+\subsection{Graph-based Manifold Construction}
+\label{sec:mnfold_construt}
+In this work, we assume that the input/output data lie near a low-dimensional manifold~\cite{fefferman2016testing}. We analyze the adversarial robustness of an ML model by transforming its input/output data into a graph, which is a discrete approximation to the underlying manifold. More concretely, consider a given model (e.g., neural networks) that maps a reshaped $M$-dimensional input feature (e.g., image) $x_i\in {\mathbb{R} ^{M}}$ to a $D$-dimensional output vector $y_i\in {\mathbb{R} ^{D}}$ through a black-box %\fixme{an unknown} \zz{a black-box? the function is technically ``known'' although we don't have its closed-form representation} 
+mapping function $y_i=F(x_i)$. SPADE leverages the k-nearest-neighbor (kNN) algorithm to construct the input (output) graph for input (output) data points, as illustrated by $G_X$ ($G_Y$) in Figure \ref{fig:overview}. 
+
+Similar to a recent work that exploits graph-b
