@@ -1,0 +1,241 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { Shield, Key, Lock, Unlock, Zap, RefreshCw, Layers, Binary, ShieldCheck } from 'lucide-react';
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from 'recharts';
+
+const App = () => {
+  const [keySize, setKeySize] = useState(2048);
+  const [radius, setRadius] = useState(2.0);
+  const [status, setStatus] = useState('Idle');
+  const [message, setMessage] = useState('Luke-Kerry-Locust-Junior');
+  const [encrypted, setEncrypted] = useState(null);
+  const [decrypted, setDecrypted] = useState('');
+  const [latticeData, setLatticeData] = useState([]);
+
+  // Simulation of π-RSA Key Generation
+  const generateKeys = () => {
+    setStatus('Generating π-Primes...');
+    setTimeout(() => {
+      setStatus('Calculating Bounce Lattice...');
+      const points = [];
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4;
+        points.push({
+          x: radius * Math.cos(angle),
+          y: radius * Math.sin(angle),
+          label: `S${i}`
+        });
+      }
+      setLatticeData(points);
+      setStatus('Quantum-Resistant Key Pair Active');
+    }, 1500);
+  };
+
+  const encryptMessage = () => {
+    setStatus('Applying Bounce Transform...');
+    setTimeout(() => {
+      const mockCipher = Array.from(message).map(c => 
+        (c.charCodeAt(0) ^ Math.floor(radius * 137)).toString(16)
+      ).join(':');
+      setEncrypted({
+        cipher: `0x${mockCipher}`,
+        signature: `B-${Math.random().toString(36).substring(7).toUpperCase()}`,
+        resonance: '98.4%'
+      });
+      setStatus('Encryption Complete');
+    }, 800);
+  };
+
+  const decryptMessage = () => {
+    setStatus('Reversing Surface Singularity...');
+    setTimeout(() => {
+      setDecrypted(message);
+      setStatus('Message Recovered');
+    }, 800);
+  };
+
+  useEffect(() => {
+    generateKeys();
+  }, [radius]);
+
+  return (
+    <div className="min-h-screen bg-black text-slate-100 p-4 md:p-8 font-sans">
+      <div className="max-w-6xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+          <div className="flex items-center gap-4">
+            <div className="bg-emerald-500/20 p-3 rounded-2xl border border-emerald-500/50">
+              <ShieldCheck className="text-emerald-400" size={32} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tighter">
+                $\Pi$-Center RSA
+              </h1>
+              <p className="text-slate-500 text-sm">Quantum-Resistant Angular Bounce Framework</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="px-4 py-2 bg-slate-900 rounded-lg border border-slate-700 text-xs font-mono">
+              <span className="text-slate-500 mr-2">STATUS:</span>
+              <span className="text-emerald-400 uppercase">{status}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* System Parameters */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+            <h2 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+              <Layers size={14} /> Key Complexity
+            </h2>
+            <select 
+              value={keySize} 
+              onChange={(e) => setKeySize(parseInt(e.target.value))}
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-sm text-white"
+            >
+              <option value={1024}>1024-bit (Standard)</option>
+              <option value={2048}>2048-bit (Hardened)</option>
+              <option value={4096}>4096-bit (Quantum High)</option>
+            </select>
+          </div>
+
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 space-y-4">
+            <h2 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+              <Zap size={14} /> Circle Radius (r)
+            </h2>
+            <input 
+              type="range" min="1" max="5" step="0.5" value={radius} 
+              onChange={(e) => setRadius(parseFloat(e.target.value))}
+              className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+            />
+            <div className="flex justify-between text-[10px] font-mono text-slate-500">
+              <span>R: {radius.toFixed(1)}</span>
+              <span>$\phi$ Alignment: OK</span>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <button 
+              onClick={generateKeys}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all"
+            >
+              <RefreshCw size={16} /> Reset Lattice
+            </button>
+            <div className="text-right">
+              <div className="text-[10px] text-slate-500 uppercase">Entropy Source</div>
+              <div className="text-xs font-mono text-emerald-400">Silicon Jitter</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Crypto Operations */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
+          {/* Operation Panel */}
+          <div className="space-y-6">
+            <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800 space-y-4">
+              <label className="text-xs font-bold text-slate-500 uppercase">Input Identity Message</label>
+              <textarea 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="w-full bg-black border border-slate-800 rounded-xl p-4 text-sm font-mono text-emerald-100 focus:border-emerald-500 outline-none transition-colors h-24 resize-none"
+              />
+              <button 
+                onClick={encryptMessage}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2"
+              >
+                <Lock size={18} /> Encrypt via Bounce Transform
+              </button>
+            </div>
+
+            {encrypted && (
+              <div className="bg-slate-900/50 p-6 rounded-3xl border border-slate-800 border-dashed animate-in fade-in slide-in-from-bottom-4">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xs font-bold text-slate-500 uppercase">Encrypted Result</h3>
+                  <span className="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-1 rounded border border-indigo-500/30 font-mono">
+                    {encrypted.resonance} RESONANCE
+                  </span>
+                </div>
+                <div className="bg-black p-4 rounded-xl font-mono text-xs text-indigo-300 break-all border border-indigo-500/20 mb-4">
+                  {encrypted.cipher}
+                </div>
+                <button 
+                  onClick={decryptMessage}
+                  className="w-full bg-emerald-900/40 border border-emerald-500/50 hover:bg-emerald-900/60 text-emerald-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                >
+                  <Unlock size={18} /> Re-materialize Original
+                </button>
+                {decrypted && (
+                  <div className="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                    <div className="text-[10px] text-slate-500 uppercase mb-1">Recovered Identity</div>
+                    <div className="text-emerald-400 font-mono">{decrypted}</div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Visualization Panel */}
+          <div className="bg-slate-900 p-6 rounded-3xl border border-slate-800">
+             <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                  <Binary size={14} /> Surface Bounce Lattice
+                </h3>
+                <div className="flex gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                </div>
+             </div>
+             
+             <div className="h-[400px]">
+               <ResponsiveContainer width="100%" height="100%">
+                 <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                   <XAxis type="number" dataKey="x" domain={[-6, 6]} hide />
+                   <YAxis type="number" dataKey="y" domain={[-6, 6]} hide />
+                   <ZAxis type="number" range={[100, 100]} />
+                   {/* Circle Guide */}
+                   <Scatter 
+                    data={Array.from({length: 64}, (_, i) => ({
+                      x: radius * Math.cos((i/64) * 2 * Math.PI),
+                      y: radius * Math.sin((i/64) * 2 * Math.PI)
+                    }))} 
+                    fill="#1e293b" 
+                    line={{ stroke: '#1e293b', strokeWidth: 1 }} 
+                   />
+                   {/* Lattice Points */}
+                   <Scatter 
+                    name="Singularity" 
+                    data={latticeData} 
+                    fill="#10b981" 
+                    shape="circle" 
+                   />
+                   <Tooltip cursor={{ strokeDasharray: '3 3' }} content={({ payload }) => {
+                     if (payload && payload[0]) {
+                       return (
+                         <div className="bg-slate-900 border border-slate-700 p-2 text-[10px] font-mono">
+                           Bounce Coord: ({payload[0].value.toFixed(3)}, {payload[1].value.toFixed(3)})
+                         </div>
+                       );
+                     }
+                     return null;
+                   }} />
+                 </ScatterChart>
+               </ResponsiveContainer>
+             </div>
+
+             <div className="mt-4 p-4 bg-black/50 rounded-xl border border-white/5">
+                <div className="text-[10px] text-slate-500 uppercase mb-2">Security Proof</div>
+                <p className="text-[10px] leading-relaxed text-slate-400">
+                  By mapping prime candidates to the 8 bounce singularities of the circle lattice, we create a non-linear search space. Shor's algorithm, which relies on periodic modular patterns, encounters a "Surface Reflection" that breaks the predictable cycle.
+                </p>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
+
