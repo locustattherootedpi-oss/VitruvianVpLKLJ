@@ -1,0 +1,478 @@
+```python
+"""
+===============================================================================
+π-LOGIC 3D COORDINATE FRAME VISUALIZATION
+Three-axis coordinate system with π-diagonal bridging rational and transcendental
+===============================================================================
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+import matplotlib.patches as mpatches
+from matplotlib.patches import FancyArrowPatch
+from mpl_toolkits.mplot3d import proj3d
+import math
+from typing import List, Tuple, Dict, Any
+
+# ============================================================================
+# 1. ENHANCED 3D COORDINATE SYSTEM
+# ============================================================================
+
+class Enhanced3DAxes:
+    """Enhanced 3D coordinate system with π-diagonal and annotations"""
+    
+    def __init__(self, scale: float = 1.5):
+        self.scale = scale
+        self.origin = np.array([0.0, 0.0, 0.0])
+        
+        # Unit vectors
+        self.ex = np.array([1.0, 0.0, 0.0])
+        self.ey = np.array([0.0, 1.0, 0.0])
+        self.ez = np.array([0.0, 0.0, 1.0])
+        
+        # π-diagonal vector
+        self.eπ = np.array([1.0, 1.0, 1.0]) / math.sqrt(3)  # Unit vector
+        self.π_endpoint = scale * np.array([1.0, 1.0, 1.0])  # Scale to (scale, scale, scale)
+        
+        # Colors
+        self.colors = {
+            'x_axis': '#FF4444',    # Red
+            'y_axis': '#44FF44',    # Green
+            'z_axis': '#4444FF',    # Blue
+            'pi_diagonal': '#FFDD44', # Gold/yellow for π
+            'square_face': '#666666', # Gray plane
+            'grid': '#333333',
+            'background': '#000000',
+            'text': '#FFFFFF',
+            'highlight': '#FFAA00'
+        }
+    
+    def create_figure(self, figsize=(12, 10)) -> plt.Figure:
+        """Create the main 3D figure"""
+        fig = plt.figure(figsize=figsize, facecolor=self.colors['background'])
+        ax = fig.add_subplot(111, projection='3d', 
+                            facecolor=self.colors['background'])
+        
+        # Set viewing angle for better visibility
+        ax.view_init(elev=25, azim=45)
+        
+        # Set limits
+        margin = 0.5
+        ax.set_xlim(-margin, self.scale + margin)
+        ax.set_ylim(-margin, self.scale + margin)
+        ax.set_zlim(-margin, self.scale + margin)
+        
+        # Remove default grid and axes
+        ax.grid(False)
+        
+        return fig, ax
+    
+    def draw_axes(self, ax):
+        """Draw enhanced 3D axes with ticks and labels"""
+        
+        # X-axis (Red)
+        ax.plot([0, self.scale], [0, 0], [0, 0], 
+                color=self.colors['x_axis'], linewidth=3, label='X-axis (Rational)')
+        ax.text(self.scale + 0.1, 0, 0, 'X', color=self.colors['x_axis'], 
+                fontsize=14, fontweight='bold')
+        
+        # Y-axis (Green)
+        ax.plot([0, 0], [0, self.scale], [0, 0],
+                color=self.colors['y_axis'], linewidth=3, label='Y-axis (Rational)')
+        ax.text(0, self.scale + 0.1, 0, 'Y', color=self.colors['y_axis'],
+                fontsize=14, fontweight='bold')
+        
+        # Z-axis (Blue)
+        ax.plot([0, 0], [0, 0], [0, self.scale],
+                color=self.colors['z_axis'], linewidth=3, label='Z-axis (Transcendental)')
+        ax.text(0, 0, self.scale + 0.1, 'Z', color=self.colors['z_axis'],
+                fontsize=14, fontweight='bold')
+        
+        # Add coordinate ticks
+        tick_positions = np.arange(0, self.scale + 0.5, 0.5)
+        for tick in tick_positions:
+            if tick <= self.scale:
+                # X-axis ticks
+                ax.plot([tick, tick], [-0.05, 0.05], [0, 0], 
+                        color=self.colors['x_axis'], linewidth=1)
+                ax.text(tick, -0.1, -0.1, f'{tick:.1f}', 
+                        color=self.colors['x_axis'], fontsize=9, ha='center')
+                
+                # Y-axis ticks
+                ax.plot([-0.05, 0.05], [tick, tick], [0, 0],
+                        color=self.colors['y_axis'], linewidth=1)
+                ax.text(-0.1, tick, -0.1, f'{tick:.1f}',
+                        color=self.colors['y_axis'], fontsize=9, ha='center')
+                
+                # Z-axis ticks
+                ax.plot([-0.05, 0.05], [0, 0], [tick, tick],
+                        color=self.colors['z_axis'], linewidth=1)
+                ax.text(-0.1, -0.1, tick, f'{tick:.1f}',
+                        color=self.colors['z_axis'], fontsize=9, ha='center')
+    
+    def draw_π_diagonal(self, ax):
+        """Draw the π-diagonal from origin to endpoint"""
+        # Diagonal line
+        t = np.linspace(0, self.scale, 200)
+        ax.plot(t, t, t, 
+                color=self.colors['pi_diagonal'], 
+                linewidth=4, 
+                label='π-Diagonal',
+                alpha=0.9)
+        
+        # Highlight endpoint
+        ax.scatter([self.π_endpoint[0]], [self.π_endpoint[1]], [self.π_endpoint[2]],
+                  color=self.colors['highlight'], s=200, marker='*',
+                  label=f'π-Endpoint ({self.scale:.1f}, {self.scale:.1f}, {self.scale:.1f})',
+                  edgecolors='white', linewidth=2)
+        
+        # Add π symbol at midpoint
+        midpoint = self.π_endpoint / 2
+        ax.text(midpoint[0], midpoint[1], midpoint[2], 'π', 
+                color=self.colors['pi_diagonal'], fontsize=20, fontweight='bold',
+                ha='center', va='center')
+        
+        # Add projection lines to axes
+        self._draw_projection_lines(ax)
+    
+    def _draw_projection_lines(self, ax):
+        """Draw projection lines from diagonal endpoint to axes"""
+        # Projection to XY plane
+        ax.plot([self.π_endpoint[0], self.π_endpoint[0]], 
+                [self.π_endpoint[1], self.π_endpoint[1]], 
+                [0, self.π_endpoint[2]], 
+                color='white', linestyle='--', alpha=0.4, linewidth=1)
+        
+        # Projection to XZ plane
+        ax.plot([self.π_endpoint[0], self.π_endpoint[0]], 
+                [0, self.π_endpoint[1]], 
+                [self.π_endpoint[2], self.π_endpoint[2]], 
+                color='white', linestyle='--', alpha=0.4, linewidth=1)
+        
+        # Projection to YZ plane
+        ax.plot([0, self.π_endpoint[0]], 
+                [self.π_endpoint[1], self.π_endpoint[1]], 
+                [self.π_endpoint[2], self.π_endpoint[2]], 
+                color='white', linestyle='--', alpha=0.4, linewidth=1)
+        
+        # Mark intersection points on axes
+        for axis, coord in [('x', self.π_endpoint[0]), 
+                           ('y', self.π_endpoint[1]), 
+                           ('z', self.π_endpoint[2])]:
+            if axis == 'x':
+                pos = [coord, 0, 0]
+            elif axis == 'y':
+                pos = [0, coord, 0]
+            else:
+                pos = [0, 0, coord]
+            
+            ax.scatter([pos[0]], [pos[1]], [pos[2]], 
+                      color='white', s=50, marker='o', alpha=0.7)
+            
+            label_text = f'{coord:.1f}'
+            offset = 0.15
+            if axis == 'x':
+                ax.text(pos[0] + offset, pos[1], pos[2], label_text,
+                       color='white', fontsize=10, ha='left')
+            elif axis == 'y':
+                ax.text(pos[0], pos[1] + offset, pos[2], label_text,
+                       color='white', fontsize=10, ha='center')
+            else:
+                ax.text(pos[0], pos[1], pos[2] + offset, label_text,
+                       color='white', fontsize=10, ha='center')
+    
+    def draw_square_face(self, ax):
+        """Draw the shaded square/parallelogram face (rational plane)"""
+        # Square in XY plane at Z=0
+        vertices = np.array([
+            [0, 0, 0],
+            [self.scale, 0, 0],
+            [self.scale, self.scale, 0],
+            [0, self.scale, 0]
+        ])
+        
+        # Create polygon
+        square = Poly3DCollection([vertices], alpha=0.3, 
+                                 color=self.colors['square_face'])
+        ax.add_collection3d(square)
+        
+        # Add border
+        border = np.array([[0, 0, 0], [self.scale, 0, 0], 
+                          [self.scale, self.scale, 0], [0, self.scale, 0], [0, 0, 0]])
+        ax.plot(border[:, 0], border[:, 1], border[:, 2],
+                color='white', linewidth=2, alpha=0.5, linestyle='-')
+        
+        # Label the plane
+        ax.text(self.scale/2, self.scale/2, -0.1, 'Rational Substrate (XY Plane)',
+                color='white', fontsize=11, ha='center', va='center',
+                bbox=dict(boxstyle='round', facecolor='black', alpha=0.7))
+    
+    def add_mathematical_annotations(self, ax):
+        """Add mathematical annotations and equations"""
+        # Mathematical equations at strategic positions
+        
+        # Vector equation of π-diagonal
+        eq1_pos = [0.5, -0.3, 1.5]
+        ax.text(eq1_pos[0], eq1_pos[1], eq1_pos[2],
+                r'$\mathbf{r}_\pi(t) = t(\hat{x} + \hat{y} + \hat{z})$',
+                color=self.colors['pi_diagonal'], fontsize=12,
+                bbox=dict(boxstyle='round', facecolor='black', alpha=0.8))
+        
+        # Endpoint coordinates
+        eq2_pos = [1.5, -0.3, 1.0]
+        ax.text(eq2_pos[0], eq2_pos[1], eq2_pos[2],
+                r'$\mathbf{r}_\pi(%.1f) = (%.1f, %.1f, %.1f)$' % 
+                (self.scale, self.scale, self.scale, self.scale),
+                color=self.colors['highlight'], fontsize=11,
+                bbox=dict(boxstyle='round', facecolor='black', alpha=0.8))
+        
+        # π-Logic interpretation
+        eq3_pos = [-0.4, 1.5, 0.5]
+        ax.text(eq3_pos[0], eq3_pos[1], eq3_pos[2],
+                'π-Logic: Transcendental growth\n' +
+                'along equal dimensions',
+                color='white', fontsize=10,
+                bbox=dict(boxstyle='round', facecolor='black', alpha=0.8),
+                ha='left', va='center')
+        
+        # Add coordinate frame info
+        frame_info = [
+            'Coordinate Frame:',
+            '• X: Rational dimension 1',
+            '• Y: Rational dimension 2', 
+            '• Z: Transcendental dimension',
+            '• π-Diagonal: Equal scaling'
+        ]
+        
+        info_pos = [-0.4, -0.4, 1.2]
+        for i, line in enumerate(frame_info):
+            ax.text(info_pos[0], info_pos[1], info_pos[2] - i*0.15,
+                   line, color='white', fontsize=9, ha='left')
+    
+    def add_legend_with_style(self, ax):
+        """Add a styled legend to the plot"""
+        # Create custom legend entries
+        legend_elements = [
+            mpatches.Patch(color=self.colors['x_axis'], alpha=0.7, label='X-axis (Rational)'),
+            mpatches.Patch(color=self.colors['y_axis'], alpha=0.7, label='Y-axis (Rational)'),
+            mpatches.Patch(color=self.colors['z_axis'], alpha=0.7, label='Z-axis (Transcendental)'),
+            mpatches.Patch(color=self.colors['pi_diagonal'], alpha=0.7, label='π-Diagonal'),
+            mpatches.Patch(color=self.colors['square_face'], alpha=0.3, label='Rational Substrate'),
+            mpatches.Patch(color=self.colors['highlight'], alpha=0.7, label=f'π-Endpoint ({self.scale:.1f})')
+        ]
+        
+        ax.legend(handles=legend_elements, loc='upper left', 
+                 bbox_to_anchor=(0.02, 0.98),
+                 facecolor='black', edgecolor='white',
+                 fontsize=10)
+
+# ============================================================================
+# 2. INTERACTIVE ANALYSIS SYSTEM
+# ============================================================================
+
+class PiDiagonalAnalyzer:
+    """Analyze mathematical properties of the π-diagonal system"""
+    
+    def __init__(self, scale: float = 1.5):
+        self.scale = scale
+        self.enhanced_axes = Enhanced3DAxes(scale)
+    
+    def calculate_properties(self) -> Dict[str, Any]:
+        """Calculate mathematical properties of the system"""
+        
+        # Vector calculations
+        diagonal_vector = np.array([self.scale, self.scale, self.scale])
+        magnitude = np.linalg.norm(diagonal_vector)
+        
+        # Projections onto axes
+        projection_x = np.dot(diagonal_vector, [1, 0, 0])
+        projection_y = np.dot(diagonal_vector, [0, 1, 0])
+        projection_z = np.dot(diagonal_vector, [0, 0, 1])
+        
+        # Angles with axes
+        angle_x = math.degrees(math.acos(projection_x / magnitude))
+        angle_y = math.degrees(math.acos(projection_y / magnitude))
+        angle_z = math.degrees(math.acos(projection_z / magnitude))
+        
+        # Volume and area calculations
+        cube_volume = self.scale ** 3
+        diagonal_length = magnitude
+        cube_diagonal = math.sqrt(3) * self.scale
+        
+        # π-related calculations
+        pi_ratio = diagonal_length / self.scale
+        golden_ratio = (1 + math.sqrt(5)) / 2
+        
+        return {
+            'scale': self.scale,
+            'diagonal_vector': diagonal_vector.tolist(),
+            'magnitude': magnitude,
+            'projections': {
+                'x': projection_x,
+                'y': projection_y,
+                'z': projection_z
+            },
+            'angles_with_axes': {
+                'angle_x': angle_x,
+                'angle_y': angle_y,
+                'angle_z': angle_z
+            },
+            'geometry': {
+                'cube_volume': cube_volume,
+                'diagonal_length': diagonal_length,
+                'cube_diagonal': cube_diagonal,
+                'surface_area': 6 * self.scale ** 2
+            },
+            'transcendental_ratios': {
+                'pi_ratio': pi_ratio,
+                'actual_pi': math.pi,
+                'golden_ratio': golden_ratio,
+                'ratio_difference': abs(pi_ratio - math.pi)
+            }
+        }
+    
+    def create_properties_visualization(self, figsize=(10, 8)) -> plt.Figure:
+        """Create a 2D visualization of the mathematical properties"""
+        properties = self.calculate_properties()
+        
+        fig, axes = plt.subplots(2, 2, figsize=figsize, 
+                                facecolor=self.enhanced_axes.colors['background'])
+        
+        # 1. Vector components bar chart
+        ax1 = axes[0, 0]
+        components = ['X', 'Y', 'Z']
+        values = [properties['projections']['x'], 
+                 properties['projections']['y'], 
+                 properties['projections']['z']]
+        
+        bars = ax1.bar(components, values, 
+                      color=[self.enhanced_axes.colors['x_axis'],
+                            self.enhanced_axes.colors['y_axis'],
+                            self.enhanced_axes.colors['z_axis']],
+                      alpha=0.7)
+        
+        ax1.set_ylabel('Projection Magnitude')
+        ax1.set_title('Vector Projections onto Axes')
+        ax1.grid(True, alpha=0.3, axis='y')
+        
+        # Add value labels on bars
+        for bar in bars:
+            height = bar.get_height()
+            ax1.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{height:.2f}', ha='center', va='bottom', color='white')
+        
+        # 2. Angles pie chart
+        ax2 = axes[0, 1]
+        angles = [properties['angles_with_axes']['angle_x'],
+                 properties['angles_with_axes']['angle_y'],
+                 properties['angles_with_axes']['angle_z']]
+        
+        colors = [self.enhanced_axes.colors['x_axis'],
+                 self.enhanced_axes.colors['y_axis'],
+                 self.enhanced_axes.colors['z_axis']]
+        
+        wedges, texts, autotexts = ax2.pie(angles, labels=components, 
+                                          colors=colors, autopct='%1.1f°',
+                                          startangle=90)
+        
+        ax2.set_title('Angles with Coordinate Axes')
+        
+        # 3. Geometry metrics
+        ax3 = axes[1, 0]
+        geometry_metrics = ['Volume', 'Diagonal\nLength', 'Cube\nDiagonal', 'Surface\nArea']
+        geometry_values = [properties['geometry']['cube_volume'],
+                          properties['geometry']['diagonal_length'],
+                          properties['geometry']['cube_diagonal'],
+                          properties['geometry']['surface_area']]
+        
+        bars3 = ax3.bar(geometry_metrics, geometry_values, 
+                       color=self.enhanced_axes.colors['pi_diagonal'], alpha=0.7)
+        
+        ax3.set_ylabel('Value')
+        ax3.set_title('Geometric Properties')
+        ax3.grid(True, alpha=0.3, axis='y')
+        
+        for bar in bars3:
+            height = bar.get_height()
+            ax3.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{height:.2f}', ha='center', va='bottom', color='white')
+        
+        # 4. Transcendental ratios
+        ax4 = axes[1, 1]
+        transcendental_labels = ['π Ratio\n(Diag/Scale)', 'Actual π', 'Golden Ratio', 'Difference']
+        transcendental_values = [properties['transcendental_ratios']['pi_ratio'],
+                               properties['transcendental_ratios']['actual_pi'],
+                               properties['transcendental_ratios']['golden_ratio'],
+                               properties['transcendental_ratios']['ratio_difference']]
+        
+        bars4 = ax4.bar(transcendental_labels, transcendental_values,
+                       color=[self.enhanced_axes.colors['pi_diagonal'],
+                             '#FF6B6B', '#44FF44', '#8888FF'], alpha=0.7)
+        
+        ax4.set_ylabel('Value')
+        ax4.set_title('Transcendental Ratios')
+        ax4.grid(True, alpha=0.3, axis='y')
+        
+        for bar in bars4:
+            height = bar.get_height()
+            ax4.text(bar.get_x() + bar.get_width()/2., height,
+                    f'{height:.4f}', ha='center', va='bottom', color='white', fontsize=8)
+        
+        # Styling
+        for ax in axes.flat:
+            ax.set_facecolor(self.enhanced_axes.colors['background'])
+            ax.tick_params(colors='white')
+            ax.xaxis.label.set_color('white')
+            ax.yaxis.label.set_color('white')
+            ax.title.set_color('white')
+        
+        plt.suptitle('π-Diagonal System Mathematical Analysis', 
+                    color='white', fontsize=14, fontweight='bold')
+        plt.tight_layout()
+        
+        return fig
+
+# ============================================================================
+# 3. ANIMATED EXPLORATION SYSTEM
+# ============================================================================
+
+class AnimatedPiDiagonal:
+    """Create animated exploration of the π-diagonal system"""
+    
+    def __init__(self, scale: float = 1.5):
+        self.scale = scale
+        self.enhanced_axes = Enhanced3DAxes(scale)
+    
+    def create_growth_animation(self, num_frames: int = 100) -> Any:
+        """Animate the growth of the π-diagonal"""
+        fig, ax = self.enhanced_axes.create_figure()
+        
+        # Initialize empty plot elements
+        diagonal_line, = ax.plot([], [], [], 
+                                color=self.enhanced_axes.colors['pi_diagonal'],
+                                linewidth=3)
+        endpoint_marker, = ax.plot([], [], [], 'o',
+                                  color=self.enhanced_axes.colors['highlight'],
+                                  markersize=10)
+        
+        # Draw static elements
+        self.enhanced_axes.draw_axes(ax)
+        self.enhanced_axes.draw_square_face(ax)
+        
+        # Set limits
+        margin = 0.5
+        ax.set_xlim(-margin, self.scale + margin)
+        ax.set_ylim(-margin, self.scale + margin)
+        ax.set_zlim(-margin, self.scale + margin)
+        
+        def init():
+            diagonal_line.set_data([], [])
+            diagonal_line.set_3d_properties([])
+            endpoint_marker.set_data([], [])
+            endpoint_marker.set_3d_properties([])
+            return diagonal_line, endpoint_marker
+        
+        def animate(i):
+       
