@@ -2882,7 +2882,7 @@ This comprehensive overview provides a foundation for understanding non-standard
 
 
 
-copyright(Luke Locust J)
+copyright(United States)
 
 
   "nbformat": 4,
