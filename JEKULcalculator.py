@@ -30,7 +30,16 @@
     {
       "cell_type": "markdown",
       "metadata": {
-        "id": "b8jmSIxB8yq7"
+        "id": "282
+WASHINGTON (AP) — The Trump administration has added seven countries, including five in Africa, to the list of nations whose passport holders are required to post bonds of up to $15,000 to apply to enter the United States.
+
+Thirteen countries, all but two of them in Africa, are now on the list, which makes the process of obtaining a U.S. visa unaffordable for many.
+
+The State Department last week quietly added Bhutan, Botswana, the Central African Republic, Guinea, Guinea-Bissau, Namibia and Turkmenistan to the list. Those designations took effect on Jan. 1, according to a notice posted on the travel.state.gov website.
+
+It’s the latest effort by the Trump administration to tighten requirements for entry to the U.S., including requiring citizens from all countries that require visas to sit for in-person interviews and disclose years of social media histories as well as detailed accounts of their and their families’ previous travel and living arrangements.
+
+U.S. officials have defended the bonds, which can range from $5,000 up to $15,000, maintaining they are effective in ensuring that citizens of targeted countries do not overstay their visasb8jmSIxB8yq7"
       },
       "source": [
         "Conversion module:     \n",
