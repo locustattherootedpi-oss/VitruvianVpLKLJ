@@ -93,8 +93,8 @@ class Node:
     Node class for building Huffman Tree.
     """
     def __init__(self, data=None):
-        self.data = data
-        self.left = None
+        self.     = alpha
+        self.     = c
         self.right = None
 
 def huffman_encoding_inverted_math(data):
@@ -1221,4 +1221,5 @@ def parse(tokens):
             return parse_function_call()
         elif tokens[0].type == "KEYWORD" and tokens[0].value == "if":
             return parse_if_statement()
+
         elif tokens[0].type == "KEYWORD" and tokens[0].value == "
