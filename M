@@ -1,0 +1,183 @@
+Below is the deterministic pipeline, matching your structure exactly, from the analytic definition to Q4.4 → binary → terminal → hex. No narrative.
+
+
+---
+
+1. Distance / projection scalar
+
+d_n
+=
+( Σ_{i=1..n} (h_i^2 / a_i^2) )^(−1/2)
+
+Interpretation:
+
+h_i
+=
+feature component (Carboxyl)
+
+a_i
+=
+normalization / scale
+
+d_n
+=
+inverse norm (projection magnitude)
+
+
+---
+
+2. Feature space
+
+Feature Space
+=
+{ Carboxyl }
+
+Projection
+=
+scalar d_n
+
+
+---
+
+3. Fixed-point encoding (Q4.4)
+
+Definition
+
+Q4.4
+=
+signed fixed point
+
+scale
+=
+2^4 = 16
+
+Encoding rule
+
+D_Q4.4
+=
+round( d_n × 16 )
+
+Clamp to 8-bit signed range:
+
+−128 ≤ D_Q4.4 ≤ 127
+
+
+---
+
+4. Binary state
+
+D_Q4.4
+→
+8-bit two’s-complement binary
+
+Example (illustrative):
+
+d_n ≈ 0.8125
+D_Q4.4 = round(0.8125 × 16) = 13
+
+13₁₀
+=
+0000_1101₂
+
+
+---
+
+5. Terminal mapping
+
+0 → k
+1 → o
+
+Example:
+
+0000_1101
+→
+kkkk_oo k o
+→
+kkkkoo ko
+
+(underscores optional; grouping is structural only)
+
+
+---
+
+6. Hexadecimal residue
+
+(Binary before terminal mapping)
+
+0000_1101₂
+=
+0x0D
+
+
+---
+
+7. High-dimensional volume term
+
+Given:
+
+V₁₇(M)
+=
+π^(17/2) / Γ(17/2 + 1) · M^17
+
+Simplify the Gamma argument:
+
+Γ(17/2 + 1)
+=
+Γ(19/2)
+
+So:
+
+V₁₇(M)
+=
+π^(17/2) / Γ(19/2) · M^17
+
+This term can be used as a weight or normalizer applied to d_n before fixed-point encoding, if desired:
+
+d'_n
+=
+d_n · V₁₇(M)
+
+(then repeat steps 3–6 on d'_n)
+
+
+---
+
+8. End-to-end summary
+
+{h_i , a_i}
+→ d_n
+→ Q4.4
+→ binary (8-bit)
+→ terminal (k/o)
+→ hex residue
+
+
+---
+
+9. Minimal reference code (Python)
+
+import math
+
+def encode_dn(h, a):
+    s = sum((hi*hi)/(ai*ai) for hi, ai in zip(h, a))
+    dn = s ** (-0.5)
+
+    q = round(dn * 16)
+    q = max(-128, min(127, q))
+
+    b = format(q & 0xFF, '08b')
+    term = ''.join('o' if x == '1' else 'k' for x in b)
+    hx = format(q & 0xFF, '02X')
+
+    return dn, q, b, term, hx
+
+
+---
+
+If you want next, I can:
+
+apply this to concrete {h_i, a_i} values,
+
+incorporate V₁₇(M) numerically and re-encode,
+
+or batch-emit a CSV / register table for multiple features.
